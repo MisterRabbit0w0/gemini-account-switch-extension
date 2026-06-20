@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Account Switch · 设置</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="settings.css" />
+</head>
+<body>
+  <div class="wrap">
+    <div class="kicker">Account Switch · 设置</div>
+    <h1>身份<span class="mark">资料</span>管理</h1>
+    <p class="lede">为每个 Google 账号起个好记的别名。一键打开 Gemini / AI Studio 时，扩展会直接以对应身份渲染页面，跳过手动切换。</p>
+
+    <div class="how">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg>
+      <p>原理：在网址后加上 <code>?authuser=邮箱</code> 或 <code>/u/序号/</code>，让 Google 直达指定账号。列表会<b style="color:var(--text)">保存在本地</b>，自动检测只在初次设置时需要联网一次。</p>
+    </div>
+
+    <div class="sec-head">
+      <h2>已配置身份</h2>
+      <span class="count" id="count">0 个</span>
+    </div>
+
+    <button class="detect" id="detect">
+      <span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 21l-4.3-4.3"/><circle cx="11" cy="11" r="7"/></svg></span>
+      <span class="spin" aria-hidden="true"></span>
+      <span id="detect-text">自动检测已登录账号</span>
+    </button>
+    <p class="hint">检测当前 Chrome 中已登录的 Google 账号并预填列表 · 检测不到可手动添加</p>
+
+    <div class="rows" id="rows"></div>
+
+    <button class="add-manual" id="add-manual">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+      手动添加身份
+    </button>
+
+    <div class="sec-head"><h2>偏好</h2></div>
+    <div class="pref">
+      <div>
+        <div class="t">打开方式</div>
+        <div class="d">点击身份按钮后在哪里打开页面</div>
+      </div>
+      <div class="seg">
+        <button type="button" class="on" data-open-in="tab">新标签页</button>
+        <button type="button" data-open-in="window">新窗口</button>
+      </div>
+    </div>
+
+    <div class="note">
+      <b>关于检测稳定性：</b>Chrome 没有官方接口可列出全部已登录账号，自动检测依赖 Google 的内部接口，未来可能失效。但因为列表已本地保存，<b>即使检测坏掉，一键打开仍照常工作</b>，只需手动维护列表即可。
+    </div>
+
+    <div class="save-bar">
+      <span class="saved" id="saved">已保存</span>
+      <button class="save" id="save">保存更改</button>
+    </div>
+  </div>
+
+<script type="module" src="settings.js"></script>
+</body>
+</html>

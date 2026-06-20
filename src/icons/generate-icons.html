@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><title>Generate Extension Icons</title>
+<style>body{font-family:system-ui;max-width:600px;margin:60px auto;text-align:center;background:#0f1014;color:#ecede6}
+h2{margin-bottom:24px}button{display:block;width:100%;margin:10px 0;padding:14px;font-size:16px;cursor:pointer;
+border:1px solid rgba(255,255,255,.14);border-radius:12px;background:rgba(255,255,255,.04);color:#ecede6;
+transition:.16s}button:hover{background:rgba(203,242,78,.1);border-color:rgba(203,242,78,.4)}
+.done{color:#CBF24E;margin-top:8px;font-size:14px}</style>
+</head>
+<body>
+<h2>Generate Extension PNG Icons</h2>
+<p style="color:#9a9da8;margin-bottom:30px">Click each button to download the icon. Then place files in <code>src/icons/</code>.</p>
+<canvas id="c" style="display:none"></canvas>
+<div id="buttons"></div>
+<script>
+const SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128"><rect width="128" height="128" rx="28" fill="#181B23"/><circle cx="48" cy="58" r="20" fill="none" stroke="#CBF24E" stroke-width="5"/><circle cx="80" cy="58" r="20" fill="none" stroke="#57C7FF" stroke-width="5" opacity="0.85"/><path d="M64 44c5.5 3.5 9 9.5 9 16.5s-3.5 13-9 16.5c-5.5-3.5-9-9.5-9-16.5s3.5-13 9-16.5z" fill="#CBF24E" opacity="0.3"/><rect x="38" y="88" width="52" height="5" rx="2.5" fill="#CBF24E" opacity="0.5"/><rect x="46" y="97" width="36" height="4" rx="2" fill="#646977" opacity="0.5"/></svg>`;
+function gen(size) {
+  const c = document.getElementById('c');
+  c.width = c.height = size;
+  const ctx = c.getContext('2d');
+  const img = new Image();
+  img.onload = () => {
+    ctx.clearRect(0,0,size,size);
+    ctx.drawImage(img,0,0,size,size);
+    const a = document.createElement('a');
+    a.download = 'icon'+size+'.png';
+    a.href = c.toDataURL('image/png');
+    a.click();
+    event.target.nextElementSibling.textContent = '✓ Downloaded icon'+size+'.png';
+  };
+  img.src = 'data:image/svg+xml;base64,' + btoa(SVG);
+}
+const container = document.getElementById('buttons');
+[16,48,128].forEach(s => {
+  const btn = document.createElement('button');
+  btn.textContent = 'Download icon'+s+'.png ('+s+'×'+s+')';
+  btn.onclick = () => gen(s);
+  const status = document.createElement('div');
+  status.className = 'done';
+  container.appendChild(btn);
+  container.appendChild(status);
+});
+</script>
+</body>
+</html>

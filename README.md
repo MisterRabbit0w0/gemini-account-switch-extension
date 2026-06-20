@@ -6,9 +6,42 @@
 
 利用 Google 自带的多账号机制，在网址后加上 `?authuser=<邮箱>`（或 `/u/<序号>/`），让 Google 直接以指定账号渲染页面。前提：这些账号都已登录在同一个 Chrome 中。
 
-## 现状
+## 安装使用
+
+1. **生成图标**（二选一）：
+   - 用浏览器打开 `src/icons/generate-icons.html`，点击按钮下载 `icon16.png`、`icon48.png`、`icon128.png`，放入 `src/icons/` 目录。
+   - 或运行 `python scripts/generate_icons.py`（需 `pip install pillow`）自动生成上述 PNG。
+2. **加载扩展**：打开 Chrome → `chrome://extensions/` → 开启「开发者模式」→ 「加载已解压的扩展」→ 选择 `src/` 目录。
+3. **设置身份**：点击扩展图标 → 齿轮或「管理设置」→ 添加你的 Google 账号。
+4. **一键切换**：点击扩展图标，在身份卡上点 `Gemini` 或 `AI Studio` 按钮即可。
+
+## 项目结构
+
+```
+src/
+├── manifest.json          # Chrome MV3 清单
+├── popup.html/css/js      # 弹窗页（身份列表 + 一键打开）
+├── settings.html/css/js   # 设置页（增删改身份 + 自动检测 + 偏好）
+├── lib/
+│   ├── urlBuilder.js      # URL 构造（authuser 拼接）
+│   ├── colors.js          # 身份色板共享常量
+│   ├── storage.js         # chrome.storage.local 封装
+│   └── detector.js        # 自动检测已登录 Google 账号
+└── icons/                 # 图标资源
+    ├── icon.svg           # 扩展图标（SVG 源）
+    ├── generate-icons.html # 辅助工具：生成 PNG 图标
+    ├── gemini_sparkle.svg # Gemini 官方图标
+    └── ai_studio.png     # AI Studio 官方图标
+```
+
+## 技术要点
+
+- **Manifest V3** Chrome 扩展，纯 HTML/CSS/JS，无构建步骤
+- **权限最小化**：仅 `storage`；`accounts.google.com` 权限仅在自动检测时按需申请
+- **数据本地化**：身份列表保存在 `chrome.storage.local`，自动检测失效不影响一键打开
+- **美学设计**：暗色主题 + acid lime 信号色 + 身份专属色标 + 动画
+
+## 文档
 
 - 设计文档：[`docs/superpowers/specs/2026-06-20-gemini-account-switch-extension-design.md`](docs/superpowers/specs/2026-06-20-gemini-account-switch-extension-design.md)
-- UI 设计原型（可直接用浏览器打开预览）：`mockups/popup.html`、`mockups/settings.html`
-
-实现尚未开始，下一步为编写实现计划。
+- UI 设计原型：`mockups/popup.html`、`mockups/settings.html`

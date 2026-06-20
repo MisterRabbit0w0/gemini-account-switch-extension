@@ -5,6 +5,7 @@ import { detect, requestPermission, hasPermission } from './lib/detector.js';
 let identities = [];
 let settings = { openIn: 'tab' };
 let dragFromIndex = null;
+let gripEngaged = false;
 
 const rowsEl = document.getElementById('rows');
 const countEl = document.getElementById('count');
@@ -16,7 +17,14 @@ function escapeAttr(str) {
   return (str || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
+function resetDragSession() {
+  dragFromIndex = null;
+  gripEngaged = false;
+  rowsEl.querySelectorAll('.row').forEach(el => el.classList.remove('drag-over', 'dragging'));
+}
+
 function render() {
+  resetDragSession();
   rowsEl.innerHTML = '';
   identities.forEach((identity, i) => {
     const colorIdx = identity.colorIndex ?? (i % PALETTE.length);
@@ -136,8 +144,19 @@ document.querySelectorAll('.seg button').forEach((btn) => {
   });
 });
 
+// Track whether the drag started from the grip handle.
+// The browser fires dragstart on the draggable element (.row),
+// NOT on the actual click target (.grip), so we use a mousedown flag.
+rowsEl.addEventListener('mousedown', (e) => {
+  gripEngaged = !!e.target.closest('.grip');
+});
+
+rowsEl.addEventListener('mouseup', () => {
+  if (dragFromIndex === null) gripEngaged = false;
+});
+
 rowsEl.addEventListener('dragstart', (e) => {
-  if (!e.target.closest('.grip')) {
+  if (!gripEngaged) {
     e.preventDefault();
     return;
   }
@@ -149,11 +168,8 @@ rowsEl.addEventListener('dragstart', (e) => {
   e.dataTransfer.setData('text/plain', row.dataset.i);
 });
 
-rowsEl.addEventListener('dragend', (e) => {
-  const row = e.target.closest('.row');
-  if (row) row.classList.remove('dragging');
-  dragFromIndex = null;
-  rowsEl.querySelectorAll('.row').forEach(el => el.classList.remove('drag-over'));
+rowsEl.addEventListener('dragend', () => {
+  resetDragSession();
 });
 
 rowsEl.addEventListener('dragover', (e) => {
@@ -180,7 +196,6 @@ rowsEl.addEventListener('drop', (e) => {
 
   const [moved] = identities.splice(dragFromIndex, 1);
   identities.splice(toIndex, 0, moved);
-  dragFromIndex = null;
   render();
 });
 

@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Gemini / AI Studio 账号切换",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "一键以指定 Google 账号打开 Gemini / AI Studio，跳过手动切换。",
   "icons": {
     "16": "icons/icon16.png",

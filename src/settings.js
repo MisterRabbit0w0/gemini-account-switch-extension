@@ -98,7 +98,8 @@ detectBtn.addEventListener('click', async () => {
   try {
     const accounts = await detect();
     if (accounts.length === 0) {
-      flashSaved('未检测到账号，请手动添加');
+      // 连接成功但读不到登录态 —— 多为跨站 Cookie（SameSite）未被发送
+      flashSaved('已连接但未读到登录账号（多为跨站 Cookie 未发送），请手动添加');
     } else {
       const existingEmails = new Set(identities.map(id => id.email.toLowerCase()));
       let added = 0;
@@ -119,7 +120,8 @@ detectBtn.addEventListener('click', async () => {
     }
   } catch (err) {
     console.error('[Account Switch] Detection error:', err);
-    flashSaved('检测失败，请手动添加');
+    // 显示具体原因（HTTP 4xx/解析失败/请求被拦等），便于定位
+    flashSaved(err?.message ? `检测失败：${err.message}` : '检测失败，请手动添加');
   } finally {
     detectBtn.classList.remove('busy');
     detectText.textContent = '自动检测已登录账号';

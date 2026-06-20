@@ -37,7 +37,7 @@ src/
 ## 技术要点
 
 - **Manifest V3** Chrome 扩展，纯 HTML/CSS/JS，无构建步骤
-- **权限最小化**：仅 `storage`；`accounts.google.com` 权限仅在自动检测时按需申请
+- **权限最小化**：仅 `storage` + `scripting`；检测时按需申请 `google.com` / `accounts.google.com` / `gemini.google.com` 访问权限
 - **数据本地化**：身份列表保存在 `chrome.storage.local`，自动检测失效不影响一键打开
 - **美学设计**：暗色主题 + acid lime 信号色 + 身份专属色标 + 动画
 

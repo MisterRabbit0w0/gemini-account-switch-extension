@@ -12,7 +12,12 @@
     "default_popup": "popup.html",
     "default_title": "账号切换台"
   },
-  "permissions": ["storage"],
-  "optional_host_permissions": ["https://accounts.google.com/*"],
+  "permissions": ["storage", "scripting"],
+  "optional_host_permissions": [
+    "https://www.google.com/*",
+    "https://accounts.google.com/*",
+    "https://gemini.google.com/*",
+    "https://aistudio.google.com/*"
+  ],
   "options_page": "settings.html"
 }

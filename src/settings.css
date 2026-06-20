@@ -170,13 +170,17 @@ h1 .mark{color:var(--accent)}
   display:flex;align-items:center;gap:14px;justify-content:flex-end;
   padding:16px 0;
 }
-.saved{font-family:var(--font-mono);font-size:12px;color:var(--accent);opacity:0;transition:.2s ease;margin-right:auto;display:flex;align-items:center;gap:7px}
+.saved{
+  font-family:var(--font-mono);font-size:12px;color:var(--accent);opacity:0;transition:.2s ease;
+  margin-right:auto;min-width:0;flex:1 1 auto;line-height:1.45;
+  display:flex;align-items:center;gap:7px;
+}
 .saved.show{opacity:1}
-.saved::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--accent)}
+.saved::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--accent);flex-shrink:0}
 .save{
   height:46px;padding:0 28px;border-radius:13px;border:none;cursor:pointer;
   background:var(--text);color:var(--ink);font-family:var(--font-body);font-weight:700;font-size:14px;
-  transition:.16s ease;
+  transition:.16s ease;flex-shrink:0;white-space:nowrap;
 }
 .save:hover{transform:translateY(-1px)}
 

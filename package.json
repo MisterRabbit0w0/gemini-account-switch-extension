@@ -1,0 +1,12 @@
+{
+  "name": "gemini-account-switch-extension",
+  "version": "1.0.0",
+  "description": "Chrome 扩展：一键以指定 Google 账号打开 Gemini / AI Studio",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test",
+    "validate": "node scripts/validate.mjs"
+  },
+  "license": "MIT"
+}

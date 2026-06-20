@@ -1,0 +1,58 @@
+name: Release
+
+# 打 tag（如 v1.0.0）即触发：校验 → 测试 → 打包 src/ 为 zip → 创建 GitHub Release 并上传
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Validate
+        run: npm run validate
+
+      - name: Unit tests
+        run: npm test
+
+      - name: 校验 tag 与 manifest 版本一致
+        run: |
+          MANIFEST_VERSION=$(node -p "require('./src/manifest.json').version")
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          echo "manifest=$MANIFEST_VERSION  tag=$TAG_VERSION"
+          if [ "$MANIFEST_VERSION" != "$TAG_VERSION" ]; then
+            echo "::error::tag ($TAG_VERSION) 与 manifest.json 版本 ($MANIFEST_VERSION) 不一致"
+            exit 1
+          fi
+          echo "VERSION=$MANIFEST_VERSION" >> "$GITHUB_ENV"
+
+      - name: 打包扩展（排除开发用文件）
+        run: |
+          ZIP="gemini-account-switch-extension-${VERSION}.zip"
+          cd src
+          zip -r "../$ZIP" . \
+            -x "icons/generate-icons.html" \
+            -x "icons/gemini_color.png" \
+            -x "icons/icon.svg"
+          cd ..
+          echo "ZIP=$ZIP" >> "$GITHUB_ENV"
+          unzip -l "$ZIP"
+
+      - name: 创建 Release 并上传 zip
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" "${ZIP}" \
+            --title "${GITHUB_REF_NAME}" \
+            --generate-notes

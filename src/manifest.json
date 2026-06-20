@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0LelHLa4H+uw6dnjCiNZdtsyy6EYAMdovlOb8EkNTgxPZIrPxws4KnziFTY5MrpmTHyQGYXl6kMQUPlBRXoWJha8Pzm8GWkk5mQARaC5oHfeT8sVxWaOM3LdBbA2xd9v8WiP9r3Kr1gjwQZQKkz0WloFIikNih9bQZwuhUl1pYuSWX+bu82m8wr9/VcVNXibfqdPm/5nX1tIgUeMVxxYdpCf738Z2h+JsM1NKRHDMRITkuNrFVc9pG19xAzxSUW8mzFiTqQ0quHWIy0V33C1CXpUWq8x8nffBrFqjfFr5IE4/MjpQzBbNniUjei6r8Ndx8rP5d/IgAcGZZblg01qWQIDAQAB",
   "name": "Gemini / AI Studio 账号切换",
-  "version": "1.0.3",
+  "version": "1.0.5",
   "description": "一键以指定 Google 账号打开 Gemini / AI Studio，跳过手动切换。",
   "icons": {
     "16": "icons/icon16.png",

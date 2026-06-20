@@ -5,6 +5,10 @@ node_modules/
 dist/
 build/
 *.zip
+*.crx
+
+# Extension private key
+*.pem
 
 # OS / editor
 .DS_Store

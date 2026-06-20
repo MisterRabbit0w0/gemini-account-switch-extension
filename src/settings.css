@@ -99,14 +99,46 @@ h1 .mark{color:var(--accent)}
   border:1px solid var(--line);border-radius:14px;
   background:linear-gradient(180deg,var(--surface) 0%, rgba(24,27,35,.5) 100%);
   padding:12px 14px;position:relative;
-  transition:.16s ease;user-select:none;
+  transition:border-color .18s ease,box-shadow .18s ease,opacity .18s ease,transform .18s ease;
+  user-select:none;
 }
 .row:hover{border-color:var(--line-strong)}
-.row.dragging{opacity:.55}
-.row.drag-over{border-color:var(--accent);box-shadow:0 0 0 1px rgba(203,242,78,.35)}
-.grip{color:var(--faint);cursor:grab;display:grid;place-items:center}
+.rows.is-dragging .row:not(.dragging){opacity:.72}
+.row.dragging{
+  opacity:.38;
+  transform:scale(1.015) rotate(.8deg);
+  border-color:color-mix(in srgb,var(--c) 55%,var(--accent));
+  box-shadow:0 16px 36px -12px rgba(0,0,0,.65),0 0 0 1px rgba(203,242,78,.22);
+  z-index:2;
+}
+.row.drag-over{
+  border-color:color-mix(in srgb,var(--accent) 45%,var(--line-strong));
+  box-shadow:0 0 0 1px rgba(203,242,78,.18);
+}
+.row.drag-over-before::before,
+.row.drag-over-after::after{
+  content:"";position:absolute;left:14px;right:14px;height:2px;border-radius:2px;
+  background:var(--accent);
+  box-shadow:0 0 10px rgba(203,242,78,.55);
+  animation:dragSlotIn .2s cubic-bezier(.22,1,.36,1) forwards;
+  pointer-events:none;
+}
+.row.drag-over-before::before{top:-6px;transform-origin:left center}
+.row.drag-over-after::after{bottom:-6px;transform-origin:right center}
+.row.drop-settle{animation:dropSettle .42s cubic-bezier(.22,1,.36,1)}
+.grip{color:var(--faint);cursor:grab;display:grid;place-items:center;transition:color .15s ease}
 .grip:active{cursor:grabbing}
-.grip svg{width:16px;height:16px;pointer-events:none}
+.grip svg{width:16px;height:16px;pointer-events:none;transition:transform .15s ease,color .15s ease}
+.grip:hover svg,.row.dragging .grip svg{color:var(--accent);transform:scale(1.12)}
+@keyframes dragSlotIn{
+  from{opacity:0;transform:scaleX(.35)}
+  to{opacity:1;transform:scaleX(1)}
+}
+@keyframes dropSettle{
+  0%{box-shadow:0 0 0 0 rgba(203,242,78,.28)}
+  45%{box-shadow:0 0 0 5px rgba(203,242,78,.1)}
+  100%{box-shadow:none}
+}
 .swatch{
   width:26px;height:26px;border-radius:9px;border:none;cursor:pointer;flex:none;
   background:var(--c);box-shadow:0 0 0 3px color-mix(in srgb,var(--c) 20%, transparent), inset 0 0 0 2px rgba(0,0,0,.18);

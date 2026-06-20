@@ -6,6 +6,7 @@ let identities = [];
 let settings = { openIn: 'tab' };
 let dragFromIndex = null;
 let gripEngaged = false;
+let insertBefore = true;
 
 const rowsEl = document.getElementById('rows');
 const countEl = document.getElementById('count');
@@ -20,10 +21,63 @@ function escapeAttr(str) {
 function resetDragSession() {
   dragFromIndex = null;
   gripEngaged = false;
-  rowsEl.querySelectorAll('.row').forEach(el => el.classList.remove('drag-over', 'dragging'));
+  insertBefore = true;
+  rowsEl.classList.remove('is-dragging');
+  rowsEl.querySelectorAll('.row').forEach(el => {
+    el.classList.remove('drag-over', 'drag-over-before', 'drag-over-after', 'dragging', 'drop-settle');
+  });
 }
 
-function render() {
+function captureRowPositions() {
+  const map = new Map();
+  rowsEl.querySelectorAll('.row').forEach((row) => {
+    if (row.dataset.id) map.set(row.dataset.id, row.getBoundingClientRect());
+  });
+  return map;
+}
+
+function flipRows(prevRects, movedId) {
+  // Clear any stale inline styles from interrupted previous animations
+  rowsEl.querySelectorAll('.row').forEach(r => {
+    r.style.transition = '';
+    r.style.transform = '';
+  });
+
+  rowsEl.querySelectorAll('.row').forEach((row) => {
+    const prev = prevRects.get(row.dataset.id);
+    if (!prev) return;
+
+    const next = row.getBoundingClientRect();
+    const dx = prev.left - next.left;
+    const dy = prev.top - next.top;
+    if (Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5) return;
+
+    row.style.transition = 'none';
+    row.style.transform = `translate(${dx}px, ${dy}px)`;
+    row.offsetHeight; // force reflow to separate the two style changes
+    row.style.transition = 'transform .34s cubic-bezier(.22, 1, .36, 1)';
+    row.style.transform = '';
+    row.addEventListener('transitionend', () => {
+      row.style.transition = '';
+      row.style.transform = '';
+    }, { once: true });
+
+    if (movedId && row.dataset.id === movedId) {
+      row.classList.add('drop-settle');
+      row.addEventListener('animationend', () => {
+        row.classList.remove('drop-settle');
+      }, { once: true });
+    }
+  });
+}
+
+function clearDragIndicators() {
+  rowsEl.querySelectorAll('.row').forEach(el => {
+    el.classList.remove('drag-over', 'drag-over-before', 'drag-over-after');
+  });
+}
+
+function render({ flipRects, movedId } = {}) {
   resetDragSession();
   rowsEl.innerHTML = '';
   identities.forEach((identity, i) => {
@@ -34,6 +88,7 @@ function render() {
     row.className = 'row';
     row.draggable = true;
     row.dataset.i = String(i);
+    row.dataset.id = identity.id || '';
     row.style.setProperty('--c', color);
     row.innerHTML = `
       <div class="grip" title="拖动排序"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg></div>
@@ -45,6 +100,10 @@ function render() {
     rowsEl.appendChild(row);
   });
   countEl.textContent = identities.length + ' 个';
+
+  if (flipRects) {
+    requestAnimationFrame(() => flipRows(flipRects, movedId));
+  }
 }
 
 rowsEl.addEventListener('click', (e) => {
@@ -164,6 +223,7 @@ rowsEl.addEventListener('dragstart', (e) => {
   if (!row) return;
   dragFromIndex = +row.dataset.i;
   row.classList.add('dragging');
+  rowsEl.classList.add('is-dragging');
   e.dataTransfer.effectAllowed = 'move';
   e.dataTransfer.setData('text/plain', row.dataset.i);
 });
@@ -177,13 +237,16 @@ rowsEl.addEventListener('dragover', (e) => {
   const row = e.target.closest('.row');
   if (!row || dragFromIndex === null) return;
   e.dataTransfer.dropEffect = 'move';
-  rowsEl.querySelectorAll('.row').forEach(el => el.classList.remove('drag-over'));
-  row.classList.add('drag-over');
+
+  const rect = row.getBoundingClientRect();
+  insertBefore = e.clientY < rect.top + rect.height / 2;
+
+  clearDragIndicators();
+  row.classList.add('drag-over', insertBefore ? 'drag-over-before' : 'drag-over-after');
 });
 
 rowsEl.addEventListener('dragleave', (e) => {
-  const row = e.target.closest('.row');
-  if (row) row.classList.remove('drag-over');
+  if (!rowsEl.contains(e.relatedTarget)) clearDragIndicators();
 });
 
 rowsEl.addEventListener('drop', (e) => {
@@ -191,12 +254,19 @@ rowsEl.addEventListener('drop', (e) => {
   const row = e.target.closest('.row');
   if (!row || dragFromIndex === null) return;
 
-  const toIndex = +row.dataset.i;
-  if (dragFromIndex === toIndex) return;
+  const overIndex = +row.dataset.i;
+  let toIndex = insertBefore ? overIndex : overIndex + 1;
+  if (dragFromIndex < toIndex) toIndex--;
+  if (dragFromIndex === toIndex) {
+    resetDragSession();
+    return;
+  }
 
+  const flipRects = captureRowPositions();
+  const movedId = identities[dragFromIndex]?.id;
   const [moved] = identities.splice(dragFromIndex, 1);
   identities.splice(toIndex, 0, moved);
-  render();
+  render({ flipRects, movedId });
 });
 
 let savedTimer;
@@ -226,6 +296,9 @@ document.getElementById('save').addEventListener('click', async () => {
 async function init() {
   const data = await load();
   identities = data.identities;
+  // Eagerly assign IDs to legacy identities (saved before generateId existed)
+  // so FLIP animations work immediately without requiring a save first
+  identities.forEach(id => { if (!id.id) id.id = generateId(); });
   settings = data.settings;
   document.querySelectorAll('.seg button').forEach((btn) => {
     btn.classList.toggle('on', btn.dataset.openIn === settings.openIn);
